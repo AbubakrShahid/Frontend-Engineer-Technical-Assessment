@@ -1,26 +1,43 @@
 # AI Chat Assistant
 
-A lightweight AI-integrated web app where users can input prompts, submit them to the OpenAI API, and receive dynamic responses. Built with **Next.js 15**, **TypeScript**, **Tailwind CSS**, and **Shadcn UI**.
+A production-grade AI chat application with real-time streaming responses, multi-conversation management, and a polished UI. Built with **Next.js 15**, **TypeScript**, **Redux Toolkit**, **Tailwind CSS v4**, and **Shadcn UI**.
+
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
+![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-2.x-purple)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8)
 
 ## Features
 
-- **Prompt Input & Submit** — Auto-resizing textarea with Enter-to-send and a submit button
-- **OpenAI Integration** — Server-side API route calling GPT-3.5 Turbo with conversation context
-- **Dynamic Response Display** — Chat bubbles with user/assistant styling and timestamps
-- **Error Handling** — Dismissible error banners for API failures, missing keys, and network issues
-- **Loading States** — Animated typing indicator while waiting for AI responses
-- **Chat History** — Conversations persist in localStorage across browser sessions
-- **Clear Button** — One-click to reset the entire conversation
+### Core
+- **Real-time Streaming** — Token-by-token response rendering via Server-Sent Events (SSE), just like ChatGPT
+- **Multi-Conversation** — Create, switch between, and delete multiple conversations with auto-generated titles
+- **Markdown Rendering** — Full markdown support including tables, lists, bold, links, and blockquotes
+- **Code Syntax Highlighting** — Syntax-highlighted code blocks with language labels and one-click copy
+- **Light & Dark Theme** — System-aware theme with manual toggle and smooth transitions
+
+### UX Polish
+- **Collapsible Sidebar** — Conversation history with timestamps, message counts, and relative dates
+- **Streaming Cursor** — Blinking caret animation while the AI is typing
+- **"Thinking" Indicator** — Animated state before the stream begins
+- **Stop Generation** — Abort an in-progress response with a single click
+- **Copy Messages** — Copy any assistant message to clipboard
+- **Auto-resize Input** — Textarea grows with content, up to 6 rows
+- **Keyboard Shortcuts** — `Cmd+Shift+N` new chat, `Cmd+Shift+O` toggle sidebar
+- **Persistent History** — All conversations survive browser refresh via Redux Persist
+- **Error Handling** — Graceful error banners for API failures with dismiss
 
 ## Tech Stack
 
-| Layer      | Technology                     |
-| ---------- | ------------------------------ |
-| Framework  | Next.js 15 (App Router)        |
-| Language   | TypeScript (strict)            |
-| Styling    | Tailwind CSS v4 + Shadcn UI   |
-| AI API     | OpenAI GPT-3.5 Turbo          |
-| State      | React hooks + localStorage     |
+| Layer            | Technology                              |
+| ---------------- | --------------------------------------- |
+| Framework        | Next.js 15 (App Router)                 |
+| Language         | TypeScript (strict, no `any`)           |
+| State Management | Redux Toolkit + Redux Persist           |
+| Styling          | Tailwind CSS v4 + Shadcn UI            |
+| AI API           | OpenAI GPT-4o Mini (streaming)          |
+| Markdown         | react-markdown + remark-gfm + rehype-highlight |
+| Theming          | next-themes                             |
 
 ## Getting Started
 
@@ -43,7 +60,7 @@ yarn install
 cp .env.example .env.local
 ```
 
-Edit `.env.local` and replace the placeholder with your actual OpenAI API key:
+Edit `.env.local` and add your OpenAI API key:
 
 ```
 OPENAI_API_KEY=sk-your-actual-key-here
@@ -69,28 +86,50 @@ yarn start
 ```
 src/
 ├── app/
-│   ├── api/chat/route.ts      # OpenAI API route handler
-│   ├── layout.tsx              # Root layout with metadata and Toaster
-│   ├── page.tsx                # Main page rendering ChatContainer
-│   └── globals.css             # Tailwind + Shadcn theme variables
+│   ├── api/
+│   │   ├── chat/route.ts          # Streaming SSE endpoint for OpenAI
+│   │   └── title/route.ts         # Auto-generate conversation titles
+│   ├── layout.tsx                  # Root layout with Providers
+│   ├── page.tsx                    # Main page
+│   └── globals.css                 # Theme, scrollbar, streaming cursor
 ├── components/
 │   ├── chat/
-│   │   ├── chat-container.tsx  # Main chat orchestrator
-│   │   ├── chat-message.tsx    # Individual message bubble
-│   │   ├── loading-indicator.tsx # Typing animation
-│   │   └── prompt-input.tsx    # Input textarea + send button
-│   └── ui/                     # Shadcn UI components
+│   │   ├── chat-container.tsx      # Main orchestrator with sidebar + chat
+│   │   ├── chat-message.tsx        # Message bubble with copy and markdown
+│   │   ├── empty-state.tsx         # Welcome screen with feature cards
+│   │   ├── loading-indicator.tsx   # "Thinking..." animation
+│   │   ├── markdown-renderer.tsx   # Markdown + code syntax highlighting
+│   │   ├── prompt-input.tsx        # Input with autosize, send/stop buttons
+│   │   └── sidebar.tsx             # Conversation list with CRUD
+│   ├── ui/                         # Shadcn UI primitives
+│   ├── providers.tsx               # Redux + Theme + Tooltip providers
+│   └── theme-toggle.tsx            # Light/Dark mode toggle
 ├── hooks/
-│   └── use-chat.ts             # Chat state management hook
-├── lib/
-│   └── utils.ts                # Utility functions (cn)
-└── types/
-    └── chat.ts                 # TypeScript interfaces
+│   └── use-stream-chat.ts          # SSE streaming hook with abort control
+├── store/
+│   ├── index.ts                    # Redux store with persist config
+│   ├── chat-slice.ts               # Multi-conversation state management
+│   └── hooks.ts                    # Typed useAppDispatch & useAppSelector
+├── types/
+│   └── chat.ts                     # TypeScript interfaces
+└── lib/
+    └── utils.ts                    # Utility functions
 ```
 
 ## Architecture Decisions
 
-- **Server-side API route** — The OpenAI API key never reaches the client; all calls go through `/api/chat`
-- **Custom `useChat` hook** — Encapsulates all chat logic (state, persistence, API calls) keeping components clean
-- **localStorage persistence** — Chat history survives page refreshes without needing a database
-- **Strict TypeScript** — No `any`, `unknown`, or loose types; every interface is explicitly defined
+- **Server-Sent Events (SSE)** — Responses stream token-by-token for a real-time typing effect, using the Web Streams API in the Next.js route handler
+- **Redux Toolkit** — Centralized state management for multi-conversation support, with `createSlice` for clean reducer logic and `createAsyncThunk` patterns
+- **Redux Persist** — All conversation data persists to `localStorage` automatically, surviving page refreshes without a backend database
+- **Server-side API routes** — OpenAI API key never reaches the client; all calls proxy through `/api/chat` and `/api/title`
+- **Component composition** — Each chat component is single-responsibility; the `ChatContainer` orchestrates layout while individual components handle their own concerns
+- **Strict TypeScript** — Zero `any`, `unknown`, or loose types throughout the entire codebase
+
+## Keyboard Shortcuts
+
+| Shortcut              | Action          |
+| --------------------- | --------------- |
+| `Enter`               | Send message    |
+| `Shift + Enter`       | New line        |
+| `Cmd/Ctrl + Shift + N`| New conversation|
+| `Cmd/Ctrl + Shift + O`| Toggle sidebar  |
