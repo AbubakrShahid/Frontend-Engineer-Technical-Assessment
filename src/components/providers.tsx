@@ -15,7 +15,6 @@ export function Providers({ children }: ProvidersProps) {
   const unsubRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    // Manually wait for redux-persist rehydration instead of PersistGate
     const unsub = persistor.subscribe(() => {
       const { bootstrapped } = persistor.getState();
       if (bootstrapped) {
@@ -25,7 +24,6 @@ export function Providers({ children }: ProvidersProps) {
     });
     unsubRef.current = unsub;
 
-    // If already bootstrapped
     if (persistor.getState().bootstrapped) {
       setIsHydrated(true);
       unsub();

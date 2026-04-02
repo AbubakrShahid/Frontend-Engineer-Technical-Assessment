@@ -54,7 +54,7 @@ export function PromptInput({
             disabled={isBusy}
             minRows={1}
             maxRows={6}
-            className="flex-1 resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed placeholder:text-muted-foreground/40 focus:outline-none disabled:opacity-50"
+            className="flex-1 resize-none bg-transparent px-2 py-1.5 text-base leading-relaxed placeholder:text-muted-foreground/40 focus:outline-none disabled:opacity-50"
           />
           {isBusy ? (
             <Button
@@ -63,7 +63,7 @@ export function PromptInput({
               className="shrink-0 rounded-xl bg-red-500 shadow-md hover:bg-red-600"
               aria-label="Stop generating"
             >
-              <Square className="h-3.5 w-3.5 fill-current" />
+              <Square className="h-4 w-4 fill-current" />
             </Button>
           ) : (
             <Button
@@ -73,19 +73,19 @@ export function PromptInput({
               className="shrink-0 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-600 shadow-md shadow-violet-500/20 transition-all hover:shadow-lg hover:shadow-violet-500/30 hover:brightness-110 disabled:shadow-none disabled:opacity-30"
               aria-label="Send message"
             >
-              <SendHorizonal className="h-3.5 w-3.5" />
+              <SendHorizonal className="h-4 w-4" />
             </Button>
           )}
         </div>
-        <div className="mt-2 flex items-center justify-center gap-3 text-[10px] text-muted-foreground/40">
+        <div className="mt-2 flex items-center justify-center gap-3 text-xs text-muted-foreground/50">
           <span>
-            <kbd className="rounded border border-border/30 bg-muted/50 px-1 py-0.5 font-mono text-[9px]">
+            <kbd className="rounded border border-border/30 bg-muted/50 px-1.5 py-0.5 font-mono text-[10px]">
               Enter
             </kbd>{" "}
             send
           </span>
           <span>
-            <kbd className="rounded border border-border/30 bg-muted/50 px-1 py-0.5 font-mono text-[9px]">
+            <kbd className="rounded border border-border/30 bg-muted/50 px-1.5 py-0.5 font-mono text-[10px]">
               Shift+Enter
             </kbd>{" "}
             new line

@@ -43,7 +43,6 @@ export function Sidebar() {
 
   return (
     <div className="flex h-full flex-col bg-muted/30 dark:bg-muted/10">
-      {/* Sidebar Header */}
       <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
@@ -62,7 +61,6 @@ export function Sidebar() {
         </Button>
       </div>
 
-      {/* Conversation List */}
       <ScrollArea className="flex-1 px-2 py-2">
         <div className="flex flex-col gap-0.5">
           {conversations.map((conversation) => {
@@ -133,7 +131,6 @@ export function Sidebar() {
         </div>
       </ScrollArea>
 
-      {/* Sidebar Footer */}
       <div className="border-t border-border/50 px-4 py-3">
         <p className="text-xs text-center text-muted-foreground/50">
           {conversations.length} conversation

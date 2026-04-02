@@ -51,26 +51,23 @@ export function ChatContainer() {
   const { sendMessage, stopStreaming } = useStreamChat();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Ensure at least one conversation exists after hydration
   useEffect(() => {
     if (conversations.length === 0) {
       dispatch(createConversation());
     }
   }, [conversations.length, dispatch]);
 
-  // Auto-close sidebar on mobile
   useEffect(() => {
     if (isMobile && sidebarOpen) {
       dispatch(setSidebarOpen(false));
     }
-  }, [isMobile]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isMobile, sidebarOpen, dispatch]);
 
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId
   );
   const messages = activeConversation?.messages ?? [];
 
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({
@@ -80,7 +77,6 @@ export function ChatContainer() {
     }
   }, [messages.length, isLoading, isStreaming]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "o") {
@@ -125,7 +121,6 @@ export function ChatContainer() {
 
   return (
     <div className="flex h-full overflow-hidden">
-      {/* Desktop Sidebar */}
       {!isMobile && (
         <aside
           className={cn(
@@ -141,7 +136,6 @@ export function ChatContainer() {
         </aside>
       )}
 
-      {/* Mobile Sidebar Sheet */}
       {isMobile && (
         <Sheet open={sidebarOpen} onOpenChange={handleMobileSheetChange}>
           <SheetContent side="left" showCloseButton={false} className="w-72 p-0">
@@ -150,9 +144,7 @@ export function ChatContainer() {
         </Sheet>
       )}
 
-      {/* Main Chat Area */}
       <div className="flex flex-1 flex-col min-w-0 bg-gradient-to-b from-background via-background to-muted/10">
-        {/* Header */}
         <header className="shrink-0 border-b border-border/50 bg-background/80 backdrop-blur-xl">
           <div className="flex items-center justify-between px-4 py-2.5">
             <div className="flex items-center gap-2">
@@ -215,7 +207,6 @@ export function ChatContainer() {
           </div>
         </header>
 
-        {/* Error Banner */}
         {error && (
           <div className="shrink-0 px-4 pt-3">
             <div className="mx-auto flex max-w-3xl items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-3 shadow-sm">
@@ -234,7 +225,6 @@ export function ChatContainer() {
           </div>
         )}
 
-        {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
           <div className="mx-auto max-w-3xl py-4">
             {messages.length === 0 && !isLoading ? (
@@ -261,7 +251,6 @@ export function ChatContainer() {
           </div>
         </div>
 
-        {/* Input */}
         <PromptInput
           onSubmit={handleSendMessage}
           onStop={stopStreaming}

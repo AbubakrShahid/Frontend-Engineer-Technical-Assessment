@@ -32,25 +32,25 @@ export function EmptyState() {
         </div>
       </div>
 
-      <h2 className="mt-8 text-2xl font-semibold tracking-tight">
+      <h2 className="mt-8 text-2xl font-bold tracking-tight">
         How can I help you today?
       </h2>
-      <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-        Start a conversation by typing a message below. I can help with questions,
-        creative writing, analysis, and much more.
+      <p className="mt-3 max-w-md text-base leading-relaxed text-muted-foreground">
+        Start a conversation by typing a message below. I can help with
+        questions, creative writing, analysis, and much more.
       </p>
 
-      <div className="mt-10 grid w-full max-w-lg grid-cols-3 gap-3">
+      <div className="mt-10 grid w-full max-w-lg grid-cols-1 sm:grid-cols-3 gap-3">
         {features.map((feature) => (
           <div
             key={feature.title}
-            className="flex flex-col items-center gap-2 rounded-2xl border border-border/50 bg-card/50 p-4 shadow-sm transition-colors hover:bg-card"
+            className="flex flex-col items-center gap-2.5 rounded-2xl border border-border/50 bg-card/50 p-5 shadow-sm transition-colors hover:bg-card"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted">
-              <feature.icon className="h-4 w-4 text-muted-foreground" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
+              <feature.icon className="h-5 w-5 text-muted-foreground" />
             </div>
-            <span className="text-xs font-medium">{feature.title}</span>
-            <span className="text-[10px] leading-tight text-muted-foreground">
+            <span className="text-sm font-semibold">{feature.title}</span>
+            <span className="text-xs leading-relaxed text-muted-foreground">
               {feature.description}
             </span>
           </div>

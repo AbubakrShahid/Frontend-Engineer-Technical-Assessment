@@ -32,16 +32,13 @@ export function useStreamChat() {
             updateConversationTitle({ id: conversationId, title: data.title })
           );
         }
-      } catch {
-        // Title generation is best-effort
-      }
+      } catch {}
     },
     [dispatch]
   );
 
   const sendMessage = useCallback(
     async (prompt: string) => {
-      // Read current state directly from the store to avoid stale closures
       const currentState = store.getState().chat;
       if (!currentState) return;
 
@@ -59,7 +56,6 @@ export function useStreamChat() {
         generateTitle(activeConversation.id, prompt);
       }
 
-      // Abort any ongoing stream
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -123,9 +119,7 @@ export function useStreamChat() {
               if (parsed.content) {
                 dispatch(appendStreamChunk(parsed.content));
               }
-            } catch {
-              // Skip malformed chunks
-            }
+            } catch {}
           }
         }
 

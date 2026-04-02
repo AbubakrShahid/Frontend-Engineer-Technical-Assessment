@@ -33,7 +33,6 @@ export function ChatMessage({
         isUser ? "flex-row-reverse" : "flex-row"
       )}
     >
-      {/* Avatar */}
       <div
         className={cn(
           "flex h-9 w-9 shrink-0 items-center justify-center rounded-full shadow-sm",
@@ -49,7 +48,6 @@ export function ChatMessage({
         )}
       </div>
 
-      {/* Content */}
       <div
         className={cn(
           "flex max-w-[80%] flex-col gap-1.5",
@@ -85,7 +83,6 @@ export function ChatMessage({
           )}
         </div>
 
-        {/* Actions */}
         {!isUser && message.content.length > 0 && !isStreaming && (
           <div className="flex items-center gap-1 px-1 opacity-0 transition-opacity group-hover:opacity-100">
             <Button
