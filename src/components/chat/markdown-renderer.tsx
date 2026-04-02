@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import rehypeHighlight from "rehype-highlight";
 import { Check, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +20,7 @@ function CodeBlock({
 }) {
   const [copied, setCopied] = useState(false);
 
-  const language = className?.replace("hljs language-", "").replace("language-", "") ?? "";
+  const language = className?.replace("language-", "") ?? "";
 
   const getTextContent = useCallback((node: React.ReactNode): string => {
     if (typeof node === "string") return node;
@@ -29,7 +28,10 @@ function CodeBlock({
     if (!node) return "";
     if (Array.isArray(node)) return node.map(getTextContent).join("");
     if (typeof node === "object" && "props" in node) {
-      return getTextContent((node as React.ReactElement<{ children?: React.ReactNode }>).props.children);
+      return getTextContent(
+        (node as React.ReactElement<{ children?: React.ReactNode }>).props
+          .children
+      );
     }
     return "";
   }, []);
@@ -42,8 +44,8 @@ function CodeBlock({
   }, [children, getTextContent]);
 
   return (
-    <div className="group/code relative my-3 overflow-hidden rounded-xl border border-border/50 bg-muted/50 dark:bg-zinc-900">
-      <div className="flex items-center justify-between border-b border-border/30 bg-muted/80 dark:bg-zinc-800/80 px-4 py-1.5">
+    <div className="group/code relative my-3 overflow-hidden rounded-xl border border-border/50 bg-zinc-50 dark:bg-zinc-900">
+      <div className="flex items-center justify-between border-b border-border/30 bg-zinc-100/80 dark:bg-zinc-800/80 px-4 py-1.5">
         <span className="text-[11px] font-mono text-muted-foreground/60 uppercase tracking-wider">
           {language || "code"}
         </span>
@@ -64,8 +66,8 @@ function CodeBlock({
           )}
         </button>
       </div>
-      <pre className="overflow-x-auto p-4">
-        <code className={cn("text-[13px] leading-relaxed", className)}>
+      <pre className="overflow-x-auto p-4 text-sm leading-relaxed">
+        <code className={cn("font-mono text-[13px]", className)}>
           {children}
         </code>
       </pre>
@@ -95,7 +97,6 @@ export function MarkdownRenderer({
     >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeHighlight]}
         components={{
           pre({ children }) {
             return <>{children}</>;
@@ -112,7 +113,7 @@ export function MarkdownRenderer({
 
             return (
               <code
-                className="rounded-md bg-muted px-1.5 py-0.5 text-[13px] font-mono"
+                className="rounded-md bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 text-[13px] font-mono text-pink-600 dark:text-pink-400"
                 {...props}
               >
                 {children}
