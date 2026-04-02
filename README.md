@@ -49,8 +49,8 @@ A polished AI chat application built as a Frontend Engineer Technical Assessment
 ### Installation
 
 ```bash
-git clone https://github.com/AbubakrShahid/Frontend-Engineer-Technical-Assessment.git
-cd Frontend-Engineer-Technical-Assessment
+git clone https://github.com/AbubakrShahid/Ai-Chat-Assistant.git
+cd Ai-Chat-Assistant
 yarn install
 ```
 
