@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { formatDistanceToNow } from "date-fns";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   createConversation,
@@ -10,31 +11,16 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Plus,
-  MessageSquare,
-  Trash2,
-  Bot,
-} from "lucide-react";
-
-function formatRelativeDate(timestamp: number): string {
-  const now = Date.now();
-  const diff = now - timestamp;
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-
-  if (minutes < 1) return "Just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  if (days < 7) return `${days}d ago`;
-  return new Date(timestamp).toLocaleDateString();
-}
+import { Plus, MessageSquare, Trash2, Bot } from "lucide-react";
 
 export function Sidebar() {
   const dispatch = useAppDispatch();
-  const conversations = useAppSelector((state) => state.chat?.conversations ?? []);
-  const activeConversationId = useAppSelector((state) => state.chat?.activeConversationId ?? null);
+  const conversations = useAppSelector(
+    (state) => state.chat?.conversations ?? []
+  );
+  const activeConversationId = useAppSelector(
+    (state) => state.chat?.activeConversationId ?? null
+  );
 
   const handleNewChat = useCallback(() => {
     dispatch(createConversation());
@@ -113,8 +99,12 @@ export function Sidebar() {
                   >
                     {conversation.title}
                   </p>
-                  <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground/50">
-                    <span>{formatRelativeDate(conversation.updatedAt)}</span>
+                  <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground/60">
+                    <span>
+                      {formatDistanceToNow(conversation.updatedAt, {
+                        addSuffix: true,
+                      })}
+                    </span>
                     {hasMessages && (
                       <>
                         <span>·</span>
@@ -145,8 +135,9 @@ export function Sidebar() {
 
       {/* Sidebar Footer */}
       <div className="border-t border-border/50 px-4 py-3">
-        <p className="text-[10px] text-center text-muted-foreground/40">
-          {conversations.length} conversation{conversations.length !== 1 ? "s" : ""}
+        <p className="text-xs text-center text-muted-foreground/50">
+          {conversations.length} conversation
+          {conversations.length !== 1 ? "s" : ""}
         </p>
       </div>
     </div>

@@ -133,19 +133,19 @@ export function ChatContainer() {
                 )}
               </Button>
 
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm">
-                    <Bot className="h-4 w-4" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm">
+                    <Bot className="h-5 w-5" />
                   </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-emerald-400" />
+                  <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background bg-emerald-400" />
                 </div>
                 <div>
-                  <h1 className="text-sm font-semibold tracking-tight">
+                  <h1 className="text-base font-semibold tracking-tight text-foreground">
                     {activeConversation?.title ?? "AI Chat"}
                   </h1>
-                  <p className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
-                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
                     {isStreaming ? "Responding..." : "GPT-4o Mini"}
                   </p>
                 </div>

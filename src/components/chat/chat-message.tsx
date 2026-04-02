@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ChatMessage as ChatMessageType } from "@/types/chat";
 import { MarkdownRenderer } from "@/components/chat/markdown-renderer";
@@ -12,7 +13,10 @@ interface ChatMessageProps {
   isStreaming?: boolean;
 }
 
-export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  isStreaming = false,
+}: ChatMessageProps) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
 
@@ -32,31 +36,32 @@ export function ChatMessage({ message, isStreaming = false }: ChatMessageProps) 
       {/* Avatar */}
       <div
         className={cn(
-          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm",
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-full shadow-sm",
           isUser
             ? "bg-gradient-to-br from-violet-500 to-indigo-600 text-white"
             : "bg-gradient-to-br from-emerald-500 to-teal-600 text-white"
         )}
       >
-        {isUser ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
+        {isUser ? (
+          <User className="h-4 w-4" />
+        ) : (
+          <Bot className="h-4 w-4" />
+        )}
       </div>
 
       {/* Content */}
       <div
         className={cn(
-          "flex max-w-[80%] flex-col gap-1",
+          "flex max-w-[80%] flex-col gap-1.5",
           isUser ? "items-end" : "items-start"
         )}
       >
         <div className="flex items-center gap-2 px-1">
-          <span className="text-[11px] font-medium text-muted-foreground/60">
+          <span className="text-xs font-semibold text-foreground">
             {isUser ? "You" : "Assistant"}
           </span>
-          <span className="text-[10px] tabular-nums text-muted-foreground/40">
-            {new Date(message.timestamp).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+          <span className="text-xs tabular-nums text-muted-foreground">
+            {format(message.timestamp, "hh:mm a")}
           </span>
         </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Check, Copy } from "lucide-react";
@@ -19,29 +19,16 @@ function CodeBlock({
   children: React.ReactNode;
 }) {
   const [copied, setCopied] = useState(false);
+  const codeRef = useRef<HTMLElement>(null);
 
   const language = className?.replace("language-", "") ?? "";
 
-  const getTextContent = useCallback((node: React.ReactNode): string => {
-    if (typeof node === "string") return node;
-    if (typeof node === "number") return String(node);
-    if (!node) return "";
-    if (Array.isArray(node)) return node.map(getTextContent).join("");
-    if (typeof node === "object" && "props" in node) {
-      return getTextContent(
-        (node as React.ReactElement<{ children?: React.ReactNode }>).props
-          .children
-      );
-    }
-    return "";
-  }, []);
-
   const handleCopy = useCallback(async () => {
-    const text = getTextContent(children);
+    const text = codeRef.current?.textContent ?? "";
     await navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }, [children, getTextContent]);
+  }, []);
 
   return (
     <div className="group/code relative my-3 overflow-hidden rounded-xl border border-border/50 bg-zinc-50 dark:bg-zinc-900">
@@ -67,7 +54,7 @@ function CodeBlock({
         </button>
       </div>
       <pre className="overflow-x-auto p-4 text-sm leading-relaxed">
-        <code className={cn("font-mono text-[13px]", className)}>
+        <code ref={codeRef} className={cn("font-mono text-[13px]", className)}>
           {children}
         </code>
       </pre>
