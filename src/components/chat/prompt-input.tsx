@@ -2,29 +2,32 @@
 
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { SendHorizonal, Sparkles } from "lucide-react";
+import { SendHorizonal, Square } from "lucide-react";
+import TextareaAutosize from "react-textarea-autosize";
 
 interface PromptInputProps {
   onSubmit: (prompt: string) => void;
+  onStop: () => void;
   isLoading: boolean;
+  isStreaming: boolean;
 }
 
-export function PromptInput({ onSubmit, isLoading }: PromptInputProps) {
+export function PromptInput({
+  onSubmit,
+  onStop,
+  isLoading,
+  isStreaming,
+}: PromptInputProps) {
   const [prompt, setPrompt] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = useCallback(() => {
     const trimmed = prompt.trim();
-    if (trimmed.length === 0 || isLoading) return;
+    if (trimmed.length === 0 || isLoading || isStreaming) return;
 
     onSubmit(trimmed);
     setPrompt("");
-
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
-  }, [prompt, isLoading, onSubmit]);
+  }, [prompt, isLoading, isStreaming, onSubmit]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -36,48 +39,59 @@ export function PromptInput({ onSubmit, isLoading }: PromptInputProps) {
     [handleSubmit]
   );
 
-  const handleInput = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setPrompt(e.target.value);
-      const target = e.target;
-      target.style.height = "auto";
-      target.style.height = `${Math.min(target.scrollHeight, 200)}px`;
-    },
-    []
-  );
+  const isBusy = isLoading || isStreaming;
 
   return (
-    <div className="border-t border-border/50 bg-background/80 backdrop-blur-xl p-4">
-      <div className="mx-auto flex max-w-3xl items-end gap-3">
-        <div className="relative flex-1">
-          <Textarea
+    <div className="border-t border-border/50 bg-background/80 backdrop-blur-xl">
+      <div className="mx-auto max-w-3xl px-4 py-3">
+        <div className="flex items-end gap-2 rounded-2xl border border-border/50 bg-muted/30 p-2 shadow-sm transition-shadow focus-within:shadow-md focus-within:ring-2 focus-within:ring-violet-500/20 focus-within:border-violet-500/30">
+          <TextareaAutosize
             ref={textareaRef}
             value={prompt}
-            onChange={handleInput}
+            onChange={(e) => setPrompt(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask me anything..."
-            disabled={isLoading}
-            rows={1}
-            className="min-h-[48px] max-h-[200px] resize-none rounded-2xl border-border/50 bg-muted/50 pr-4 pl-4 pt-3 text-sm shadow-sm transition-shadow focus:shadow-md focus:ring-2 focus:ring-violet-500/20"
+            placeholder="Message AI Assistant..."
+            disabled={isBusy}
+            minRows={1}
+            maxRows={6}
+            className="flex-1 resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed placeholder:text-muted-foreground/40 focus:outline-none disabled:opacity-50"
           />
-        </div>
-        <Button
-          onClick={handleSubmit}
-          disabled={isLoading || prompt.trim().length === 0}
-          size="icon-lg"
-          className="shrink-0 rounded-2xl bg-gradient-to-r from-violet-500 to-indigo-600 shadow-md shadow-violet-500/25 transition-all hover:shadow-lg hover:shadow-violet-500/30 hover:brightness-110 disabled:shadow-none disabled:from-muted disabled:to-muted"
-          aria-label="Send message"
-        >
-          {isLoading ? (
-            <Sparkles className="h-4 w-4 animate-pulse" />
+          {isBusy ? (
+            <Button
+              onClick={onStop}
+              size="icon"
+              className="shrink-0 rounded-xl bg-red-500 shadow-md hover:bg-red-600"
+              aria-label="Stop generating"
+            >
+              <Square className="h-3.5 w-3.5 fill-current" />
+            </Button>
           ) : (
-            <SendHorizonal className="h-4 w-4" />
+            <Button
+              onClick={handleSubmit}
+              disabled={prompt.trim().length === 0}
+              size="icon"
+              className="shrink-0 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-600 shadow-md shadow-violet-500/20 transition-all hover:shadow-lg hover:shadow-violet-500/30 hover:brightness-110 disabled:shadow-none disabled:opacity-30"
+              aria-label="Send message"
+            >
+              <SendHorizonal className="h-3.5 w-3.5" />
+            </Button>
           )}
-        </Button>
+        </div>
+        <div className="mt-2 flex items-center justify-center gap-3 text-[10px] text-muted-foreground/40">
+          <span>
+            <kbd className="rounded border border-border/30 bg-muted/50 px-1 py-0.5 font-mono text-[9px]">
+              Enter
+            </kbd>{" "}
+            send
+          </span>
+          <span>
+            <kbd className="rounded border border-border/30 bg-muted/50 px-1 py-0.5 font-mono text-[9px]">
+              Shift+Enter
+            </kbd>{" "}
+            new line
+          </span>
+        </div>
       </div>
-      <p className="mx-auto mt-2 max-w-3xl text-center text-[11px] text-muted-foreground/50">
-        Press <kbd className="rounded border border-border/50 bg-muted px-1 py-0.5 text-[10px] font-mono">Enter</kbd> to send, <kbd className="rounded border border-border/50 bg-muted px-1 py-0.5 text-[10px] font-mono">Shift+Enter</kbd> for new line
-      </p>
     </div>
   );
 }

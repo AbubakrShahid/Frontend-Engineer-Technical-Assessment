@@ -3,6 +3,7 @@
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { ThemeProvider } from "next-themes";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { store, persistor } from "@/store";
 
 interface ProvidersProps {
@@ -19,7 +20,9 @@ export function Providers({ children }: ProvidersProps) {
           enableSystem
           disableTransitionOnChange={false}
         >
-          {children}
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
         </ThemeProvider>
       </PersistGate>
     </Provider>
