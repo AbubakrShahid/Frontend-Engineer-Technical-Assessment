@@ -1,18 +1,20 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import { useChat } from "@/hooks/use-chat";
+import { useRef, useEffect, useCallback } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { sendMessage, addUserMessage, clearChat, dismissError } from "@/store/chat-slice";
 import { ChatMessage } from "@/components/chat/chat-message";
 import { PromptInput } from "@/components/chat/prompt-input";
 import { LoadingIndicator } from "@/components/chat/loading-indicator";
+import { EmptyState } from "@/components/chat/empty-state";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Bot, Trash2, X, AlertCircle } from "lucide-react";
+import { Bot, Trash2, X, AlertCircle, MessageSquare } from "lucide-react";
 
 export function ChatContainer() {
-  const { messages, isLoading, error, sendMessage, clearChat, dismissError } =
-    useChat();
+  const dispatch = useAppDispatch();
+  const { messages, isLoading, error } = useAppSelector((state) => state.chat);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,69 +23,92 @@ export function ChatContainer() {
     }
   }, [messages, isLoading]);
 
+  const handleSendMessage = useCallback(
+    (prompt: string) => {
+      dispatch(addUserMessage(prompt));
+      dispatch(sendMessage(prompt));
+    },
+    [dispatch]
+  );
+
+  const handleClearChat = useCallback(() => {
+    dispatch(clearChat());
+  }, [dispatch]);
+
+  const handleDismissError = useCallback(() => {
+    dispatch(dismissError());
+  }, [dispatch]);
+
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-gradient-to-b from-background to-muted/20">
       {/* Header */}
-      <header className="flex items-center justify-between border-b px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Bot className="h-5 w-5" />
+      <header className="sticky top-0 z-10 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25">
+                <Bot className="h-5 w-5" />
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background bg-emerald-400" />
+            </div>
+            <div>
+              <h1 className="text-base font-semibold tracking-tight">AI Chat Assistant</h1>
+              <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                Powered by OpenAI
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-semibold leading-none">AI Chat Assistant</h1>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Powered by OpenAI
-            </p>
+
+          <div className="flex items-center gap-1">
+            {messages.length > 0 && (
+              <div className="mr-2 flex items-center gap-1.5 rounded-full bg-muted/50 px-3 py-1">
+                <MessageSquare className="h-3 w-3 text-muted-foreground" />
+                <span className="text-xs tabular-nums text-muted-foreground">
+                  {messages.length}
+                </span>
+              </div>
+            )}
+            <ThemeToggle />
+            {messages.length > 0 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleClearChat}
+                className="rounded-full text-muted-foreground hover:text-destructive"
+                aria-label="Clear chat"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
-        {messages.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={clearChat}
-            className="gap-1.5 text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            Clear Chat
-          </Button>
-        )}
       </header>
 
       {/* Error Banner */}
       {error && (
-        <div className="px-6 pt-3">
-          <Alert variant="destructive" className="relative">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="pr-8">{error}</AlertDescription>
+        <div className="mx-auto w-full max-w-4xl px-4 pt-3">
+          <div className="flex items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-3">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+            <p className="flex-1 text-sm text-destructive">{error}</p>
             <Button
               variant="ghost"
               size="icon-xs"
-              onClick={dismissError}
-              className="absolute right-2 top-2"
+              onClick={handleDismissError}
+              className="shrink-0 text-destructive/60 hover:text-destructive"
               aria-label="Dismiss error"
             >
               <X className="h-3 w-3" />
             </Button>
-          </Alert>
+          </div>
         </div>
       )}
 
       {/* Messages Area */}
       <ScrollArea ref={scrollRef} className="flex-1">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto max-w-3xl py-4">
           {messages.length === 0 && !isLoading ? (
-            <div className="flex flex-col items-center justify-center py-24 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
-                <Bot className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h2 className="mt-6 text-xl font-semibold">
-                How can I help you today?
-              </h2>
-              <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-                Type a message below to start a conversation with the AI
-                assistant. Your chat history will be saved locally.
-              </p>
-            </div>
+            <EmptyState />
           ) : (
             <>
               {messages.map((message) => (
@@ -96,7 +121,7 @@ export function ChatContainer() {
       </ScrollArea>
 
       {/* Input Area */}
-      <PromptInput onSubmit={sendMessage} isLoading={isLoading} />
+      <PromptInput onSubmit={handleSendMessage} isLoading={isLoading} />
     </div>
   );
 }
