@@ -24,11 +24,9 @@ function createNewConversation(): Conversation {
   };
 }
 
-const initialConversation = createNewConversation();
-
 const initialState: ChatState = {
-  conversations: [initialConversation],
-  activeConversationId: initialConversation.id,
+  conversations: [],
+  activeConversationId: null,
   isLoading: false,
   isStreaming: false,
   error: null,

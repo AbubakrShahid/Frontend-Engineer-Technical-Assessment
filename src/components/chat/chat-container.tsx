@@ -3,10 +3,10 @@
 import { useRef, useEffect, useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
+  createConversation,
   clearConversation,
   dismissError,
   toggleSidebar,
-  createConversation,
 } from "@/store/chat-slice";
 import { useStreamChat } from "@/hooks/use-stream-chat";
 import { ChatMessage } from "@/components/chat/chat-message";
@@ -15,7 +15,6 @@ import { LoadingIndicator } from "@/components/chat/loading-indicator";
 import { EmptyState } from "@/components/chat/empty-state";
 import { Sidebar } from "@/components/chat/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import {
   Bot,
@@ -36,19 +35,31 @@ export function ChatContainer() {
   const isStreaming = useAppSelector((state) => state.chat?.isStreaming ?? false);
   const error = useAppSelector((state) => state.chat?.error ?? null);
   const sidebarOpen = useAppSelector((state) => state.chat?.sidebarOpen ?? true);
+
   const { sendMessage, stopStreaming } = useStreamChat();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Ensure at least one conversation exists after hydration
+  useEffect(() => {
+    if (conversations.length === 0) {
+      dispatch(createConversation());
+    }
+  }, [conversations.length, dispatch]);
 
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId
   );
   const messages = activeConversation?.messages ?? [];
 
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
-  }, [messages, isLoading, isStreaming]);
+  }, [messages.length, isLoading, isStreaming]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -89,21 +100,23 @@ export function ChatContainer() {
   return (
     <div className="flex h-full overflow-hidden">
       {/* Sidebar */}
-      <div
+      <aside
         className={cn(
-          "shrink-0 border-r border-border/50 transition-all duration-300 ease-in-out overflow-hidden",
+          "shrink-0 border-r border-border/50 overflow-hidden",
+          "transition-[width] duration-300 ease-in-out",
           sidebarOpen ? "w-72" : "w-0"
         )}
+        style={{ willChange: "width" }}
       >
         <div className="h-full w-72">
           <Sidebar />
         </div>
-      </div>
+      </aside>
 
       {/* Main Chat Area */}
       <div className="flex flex-1 flex-col min-w-0 bg-gradient-to-b from-background via-background to-muted/10">
         {/* Header */}
-        <header className="sticky top-0 z-10 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+        <header className="shrink-0 border-b border-border/50 bg-background/80 backdrop-blur-xl">
           <div className="flex items-center justify-between px-4 py-2.5">
             <div className="flex items-center gap-2">
               <Button
@@ -167,7 +180,7 @@ export function ChatContainer() {
 
         {/* Error Banner */}
         {error && (
-          <div className="px-4 pt-3">
+          <div className="shrink-0 px-4 pt-3">
             <div className="mx-auto flex max-w-3xl items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-3 shadow-sm">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
               <p className="flex-1 text-sm text-destructive">{error}</p>
@@ -184,8 +197,11 @@ export function ChatContainer() {
           </div>
         )}
 
-        {/* Messages */}
-        <ScrollArea ref={scrollRef} className="flex-1">
+        {/* Messages — native scroll div instead of ScrollArea */}
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto"
+        >
           <div className="mx-auto max-w-3xl py-4">
             {messages.length === 0 && !isLoading ? (
               <EmptyState />
@@ -209,7 +225,7 @@ export function ChatContainer() {
               </>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Input */}
         <PromptInput

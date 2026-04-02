@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
+import { store } from "@/store";
 import {
   addUserMessage,
   startStreaming,
@@ -15,13 +16,6 @@ import { ChatMessage, StreamChunk } from "@/types/chat";
 export function useStreamChat() {
   const dispatch = useAppDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
-
-  const activeConversation = useAppSelector((state) => {
-    const conversations = state.chat?.conversations ?? [];
-    return conversations.find(
-      (c) => c.id === state.chat?.activeConversationId
-    );
-  });
 
   const generateTitle = useCallback(
     async (conversationId: string, firstMessage: string) => {
@@ -39,7 +33,7 @@ export function useStreamChat() {
           );
         }
       } catch {
-        // Title generation is best-effort, don't show errors
+        // Title generation is best-effort
       }
     },
     [dispatch]
@@ -47,6 +41,13 @@ export function useStreamChat() {
 
   const sendMessage = useCallback(
     async (prompt: string) => {
+      // Read current state directly from the store to avoid stale closures
+      const currentState = store.getState().chat;
+      if (!currentState) return;
+
+      const activeConversation = currentState.conversations.find(
+        (c) => c.id === currentState.activeConversationId
+      );
       if (!activeConversation) return;
 
       const isFirstMessage = activeConversation.messages.length === 0;
@@ -54,7 +55,6 @@ export function useStreamChat() {
 
       dispatch(addUserMessage(prompt));
 
-      // Generate title from first message
       if (isFirstMessage) {
         generateTitle(activeConversation.id, prompt);
       }
@@ -144,7 +144,7 @@ export function useStreamChat() {
         abortControllerRef.current = null;
       }
     },
-    [activeConversation, dispatch, generateTitle]
+    [dispatch, generateTitle]
   );
 
   const stopStreaming = useCallback(() => {

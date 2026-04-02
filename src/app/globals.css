@@ -130,10 +130,9 @@
   }
 }
 
-/* Smooth theme transitions */
-*,
-*::before,
-*::after {
+/* Smooth theme transitions — scoped to avoid overriding explicit transitions */
+.dark *:not([class*="transition-"]),
+:root *:not([class*="transition-"]) {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
 }
 
