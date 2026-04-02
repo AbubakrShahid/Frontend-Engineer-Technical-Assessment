@@ -33,9 +33,8 @@ function formatRelativeDate(timestamp: number): string {
 
 export function Sidebar() {
   const dispatch = useAppDispatch();
-  const { conversations, activeConversationId } = useAppSelector(
-    (state) => state.chat
-  );
+  const conversations = useAppSelector((state) => state.chat?.conversations ?? []);
+  const activeConversationId = useAppSelector((state) => state.chat?.activeConversationId ?? null);
 
   const handleNewChat = useCallback(() => {
     dispatch(createConversation());

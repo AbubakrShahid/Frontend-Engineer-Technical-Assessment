@@ -17,8 +17,9 @@ export function useStreamChat() {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const activeConversation = useAppSelector((state) => {
-    return state.chat.conversations.find(
-      (c) => c.id === state.chat.activeConversationId
+    const conversations = state.chat?.conversations ?? [];
+    return conversations.find(
+      (c) => c.id === state.chat?.activeConversationId
     );
   });
 

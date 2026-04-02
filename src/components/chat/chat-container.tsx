@@ -30,8 +30,12 @@ import { cn } from "@/lib/utils";
 
 export function ChatContainer() {
   const dispatch = useAppDispatch();
-  const { conversations, activeConversationId, isLoading, isStreaming, error, sidebarOpen } =
-    useAppSelector((state) => state.chat);
+  const conversations = useAppSelector((state) => state.chat?.conversations ?? []);
+  const activeConversationId = useAppSelector((state) => state.chat?.activeConversationId ?? null);
+  const isLoading = useAppSelector((state) => state.chat?.isLoading ?? false);
+  const isStreaming = useAppSelector((state) => state.chat?.isStreaming ?? false);
+  const error = useAppSelector((state) => state.chat?.error ?? null);
+  const sidebarOpen = useAppSelector((state) => state.chat?.sidebarOpen ?? true);
   const { sendMessage, stopStreaming } = useStreamChat();
   const scrollRef = useRef<HTMLDivElement>(null);
 
